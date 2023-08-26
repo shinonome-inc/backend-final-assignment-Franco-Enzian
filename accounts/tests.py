@@ -102,6 +102,7 @@ class TestSignupView(TestCase):
         print(form.errors)
 
     def test_failure_post_with_duplicated_user(self):
+        User.objects.create_user(username="testuser", email="test@test.com", password="testpassword")
         invalid_data = {
             "username": "testuser",
             "email": "test@test.com",
@@ -112,9 +113,8 @@ class TestSignupView(TestCase):
         form = response.context["form"]
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
-        self.assertIn("このユーザーは既に登録されています。", form.errors["username"])
+        self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
 
         print(form.errors)
 

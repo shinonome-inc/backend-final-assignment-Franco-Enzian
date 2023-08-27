@@ -48,8 +48,6 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("このフィールドは必須です。", form.errors["username"])
 
-        print(form.errors)
-
     def test_failure_post_with_empty_username(self):
         invalid_data = {
             "username": "",
@@ -64,8 +62,6 @@ class TestSignupView(TestCase):
         self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("このフィールドは必須です。", form.errors["username"])
-
-        print(form.errors)
 
     def test_failure_post_with_empty_email(self):
         invalid_data = {
@@ -82,8 +78,6 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("このフィールドは必須です。", form.errors["email"])
 
-        print(form.errors)
-
     def test_failure_post_with_empty_password(self):
         invalid_data = {
             "username": "testuser",
@@ -98,8 +92,6 @@ class TestSignupView(TestCase):
         self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("このフィールドは必須です。", form.errors["password1"])
-
-        print(form.errors)
 
     def test_failure_post_with_duplicated_user(self):
         User.objects.create_user(username="testuser", email="test@test.com", password="testpassword")
@@ -116,8 +108,6 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("同じユーザー名が既に登録済みです。", form.errors["username"])
 
-        print(form.errors)
-
     def test_failure_post_with_invalid_email(self):
         invalid_data = {
             "username": "testuser",
@@ -132,8 +122,6 @@ class TestSignupView(TestCase):
         self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("有効なメールアドレスを入力してください。", form.errors["email"])
-
-        print(form.errors)
 
     def test_failure_post_with_too_short_password(self):
         invalid_data = {
@@ -150,8 +138,6 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("このパスワードは短すぎます。最低 8 文字以上必要です。", form.errors["password2"])
 
-        print(form.errors)
-
     def test_failure_post_with_password_similar_to_username(self):
         invalid_data = {
             "username": "testuser",
@@ -166,8 +152,6 @@ class TestSignupView(TestCase):
         self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("このパスワードは ユーザー名 と似すぎています。", form.errors["password2"])
-
-        print(form.errors)
 
     def test_failure_post_with_only_numbers_password(self):
         invalid_data = {
@@ -184,8 +168,6 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("このパスワードは数字しか使われていません。", form.errors["password2"])
 
-        print(form.errors)
-
     def test_failure_post_with_mismatch_password(self):
         invalid_data = {
             "username": "testuser",
@@ -200,8 +182,6 @@ class TestSignupView(TestCase):
         self.assertFalse(User.objects.filter(username=invalid_data["username"]).exists())
         self.assertFalse(form.is_valid())
         self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
-
-        print(form.errors)
 
 
 # class TestLoginView(TestCase):

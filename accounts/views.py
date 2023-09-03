@@ -27,7 +27,7 @@ class LoginView(auth_views.LoginView):
 
 
 class LogoutView(auth_views.LogoutView):
-    template_name = "accounts/login.html"
+    pass
 
 
 class UserProfileView(TemplateView):

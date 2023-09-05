@@ -184,6 +184,7 @@ class TestSignupView(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("確認用パスワードが一致しません。", form.errors["password2"])
 
+
 class TestLoginView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpassword")

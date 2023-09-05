@@ -8,7 +8,7 @@ User = get_user_model()
 
 class TestSignupView(TestCase):
     def setUp(self):
-        self.url = reverse(settings.LOGIN_URL)
+        self.url = reverse("accounts:signup")
 
     def test_success_get(self):
         response = self.client.get(self.url)

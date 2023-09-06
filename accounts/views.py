@@ -1,7 +1,6 @@
 # from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 
@@ -20,10 +19,6 @@ class SignupView(CreateView):
         user = authenticate(self.request, username=username, password=password)
         login(self.request, user)
         return response
-
-
-class LoginView(auth_views.LoginView):
-    template_name = "accounts/login.html"
 
 
 class UserProfileView(TemplateView):

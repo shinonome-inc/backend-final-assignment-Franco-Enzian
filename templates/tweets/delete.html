@@ -1,0 +1,7 @@
+<form method="post">
+<h2>{{ tweet.user }}の以下のツイートを本当に削除しますか？</h2>
+<p>{{ tweet.content }}</p>
+    {{ form.as_p }}
+    {% csrf_token %}
+    <button type="submit">削除</button>
+</form>

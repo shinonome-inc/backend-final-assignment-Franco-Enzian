@@ -16,8 +16,9 @@
 <p>{{ tweet.content|truncatechars:30 }}</p>
 <p>公開日：{{ tweet.created_at }}</p>
 <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
+{% if tweet.user == request.user %}
 <a href="{% url 'tweets:delete' tweet.pk %}">削除</a>
-
+{% endif %}
 {% endfor %}
 
 {% endblock %}

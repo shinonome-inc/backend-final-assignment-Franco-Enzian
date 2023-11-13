@@ -40,31 +40,25 @@ class TestTweetCreateView(TestCase):
         response = self.client.post(self.url, post_data)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("tweets:home"))
-        initial_tweet_count = Tweet.objects.count()
-        self.assertEqual(Tweet.objects.count(), initial_tweet_count)
-        new_tweet = Tweet.objects.latest("id")
-        self.assertEqual(new_tweet.content, post_data["content"])
+        self.assertTrue(Tweet.objects.filter(id=1).exists())
+        self.assertEqual(Tweet.objects.get(id=1).content, post_data["content"])
 
     def test_failure_post_with_empty_content(self):
-        tweets_count_before = Tweet.objects.count()
         not_available_data = {"content": ""}
         response = self.client.post(self.url, not_available_data)
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertIn("このフィールドは必須です。", form.errors["content"])
-        tweets_count_after = Tweet.objects.count()
-        self.assertEqual(tweets_count_before, tweets_count_after)
+        self.assertFalse(Tweet.objects.filter(id=1).exists())
 
     def test_failure_post_with_too_long_content(self):
         too_long_content = "a" * (Tweet._meta.get_field("content").max_length + 1)
         max_length = Tweet._meta.get_field("content").max_length
-        tweets_count_before = Tweet.objects.count()
         response = self.client.post(self.url, {"content": too_long_content})
         self.assertEqual(response.status_code, 200)
         form = response.context["form"]
         self.assertTrue("このフィールドの文字数は {0} 文字以下にしてください。".format(max_length), form.errors["content"])
-        tweets_count_after = Tweet.objects.count()
-        self.assertEqual(tweets_count_before, tweets_count_after)
+        self.assertFalse(Tweet.objects.filter(id=1).exists())
 
 
 class TestTweetDetailView(TestCase):

@@ -22,3 +22,10 @@ urlpatterns = [
     path("tweets/", include("tweets.urls")),
     path("", include("welcome.urls")),
 ]
+
+# if settings.SQL_DEBUG:
+#     import debug_toolbar
+
+# urlpatterns += [
+#     path("__debug__/", include(debug_toolbar.urls)),
+# ]

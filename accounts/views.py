@@ -1,8 +1,12 @@
 # from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth import authenticate, login
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
+
+from accounts.models import User
+from tweets.models import Tweet
 
 from .forms import SignupForm
 
@@ -22,4 +26,12 @@ class SignupView(CreateView):
 
 
 class UserProfileView(TemplateView):
-    template_name = "tweets/home.html"
+    model = Tweet
+    template_name = "accounts/user_profile.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        username = self.kwargs["username"]
+        user = get_object_or_404(User, username=username)
+        context["tweets"] = Tweet.objects.filter(user=user).order_by("-created_at")
+        return context

@@ -242,7 +242,7 @@ class TestLogoutView(TestCase):
         self.assertNotIn(SESSION_KEY, self.client.session)
 
 
-class TestTUserProfileView(TestCase):
+class TestUserProfileView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpassword")
         self.tweet = Tweet.objects.create(user=self.user, content="TestContent")

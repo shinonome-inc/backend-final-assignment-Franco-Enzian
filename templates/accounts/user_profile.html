@@ -5,11 +5,21 @@
 {% block content %}
 
 <h2>Profile</h2>
+<form action="{% url 'accounts:follow' username=username %}" method="post">
+    {% csrf_token %}
+    <button type="submit">フォローする</button>
+</form>
+<form action="{% url 'accounts:unfollow' username=username %}" method="post">
+    {% csrf_token %}
+    <button type="submit">フォロー解除</button>
+</form>
+<h3><a href="{% url 'accounts:following_list' username=username %}">フォロー中：{{ following_count }}人</a></h3>
+<h3><a href="{% url 'accounts:follower_list' username=username %}">フォロワー：{{ followers_count }}人</a></h3>
+
 <hr>
 {% for tweet in tweets %}
 <h2>{{ tweet.user }}</h2>
 <p>{{ tweet.content|truncatechars:30 }}</p>
 <p>公開日：{{ tweet.created_at }}</p>
 {% endfor %}
-
 {% endblock %}

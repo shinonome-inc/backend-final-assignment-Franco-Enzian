@@ -5,8 +5,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, ListView, TemplateView, View
 
 from accounts.models import FriendShip, User
@@ -49,7 +47,6 @@ class UserProfileView(TemplateView):
 class FollowView(LoginRequiredMixin, View):
     model = FriendShip
 
-    @method_decorator(require_POST)
     def post(self, request, username):
         followed_user = get_object_or_404(User, username=username)
         following_user = self.request.user

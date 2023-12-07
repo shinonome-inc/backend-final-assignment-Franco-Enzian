@@ -13,9 +13,8 @@ class FriendShip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['following', 'followed'], name='only_one_object')
-        ]
+        # 再度同じユーザーをフォローすることを出来なくする。
+        constraints = [models.UniqueConstraint(fields=["following", "followed"], name="only_one_object")]
 
     def clean(self):
         if self.following == self.followed:

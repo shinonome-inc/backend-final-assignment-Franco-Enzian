@@ -13,7 +13,9 @@ class FriendShip(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("following", "followed")
+        constraints = [
+            models.UniqueConstraint(fields=['following', 'followed'], name='only_one_object')
+        ]
 
     def clean(self):
         if self.following == self.followed:

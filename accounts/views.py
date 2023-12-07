@@ -49,7 +49,6 @@ class UserProfileView(TemplateView):
 class FollowView(LoginRequiredMixin, View):
     model = FriendShip
 
-    @method_decorator(require_POST)
     def post(self, request, username):
         followed_user = get_object_or_404(User, username=username)
         following_user = self.request.user

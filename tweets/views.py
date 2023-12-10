@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Exists, OuterRef
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, View
 from django.views.generic.edit import CreateView
@@ -54,7 +54,12 @@ class LikeView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         target_tweet_id = self.kwargs.get("pk")
-        target_tweet = Tweet.objects.get(pk=target_tweet_id)
+
+        try:
+            target_tweet = Tweet.objects.get(pk=target_tweet_id)
+        except Tweet.DoesNotExist:
+            raise Http404("Tweet not found")
+
         liked_by = request.user
         Like.objects.get_or_create(tweet=target_tweet, user=liked_by)
         context = {"likes_count": target_tweet.likes.count()}
@@ -64,7 +69,12 @@ class LikeView(LoginRequiredMixin, View):
 class UnlikeView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         target_tweet_id = self.kwargs.get("pk")
-        target_tweet = Tweet.objects.get(pk=target_tweet_id)
+
+        try:
+            target_tweet = Tweet.objects.get(pk=target_tweet_id)
+        except Tweet.DoesNotExist:
+            raise Http404("Tweet not found")
+
         liked_by = request.user
         Like.objects.filter(tweet=target_tweet, user=liked_by).delete()
         context = {"likes_count": target_tweet.likes.count()}

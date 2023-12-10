@@ -169,7 +169,7 @@ class TestUnLikeView(TestCase):
         url = reverse("tweets:unlike", args=(not_exist_tweet_id,))
         response = self.client.post(url)
         self.assertEqual(response.status_code, 404)
-        self.assertFalse(Like.objects.filter(user=self.user).exists())
+        self.assertTrue(Like.objects.filter(id=another_user_tweet.id).exists())
 
     def test_failure_post_with_unliked_tweet(self):
         another_user = User.objects.create_user(

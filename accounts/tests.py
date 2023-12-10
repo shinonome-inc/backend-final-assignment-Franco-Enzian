@@ -246,6 +246,7 @@ class TestLogoutView(TestCase):
 class TestUserProfileView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", email="test@test.com", password="testpassword")
+        self.client.login(username="testuser", password="testpassword")
         self.tweet = Tweet.objects.create(user=self.user, content="TestContent")
         self.other_tweet = Tweet.objects.create(user=self.user, content="TestContent2")
         self.url = reverse("accounts:user_profile", kwargs={"username": self.user.username})
@@ -260,6 +261,7 @@ class TestUserProfileView(TestCase):
 class TestUserProfileEditView(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="tester", password="testpassword")
+        self.client.login(username="tester", password="testpassword")
         other_user = User.objects.create_user(username="other_user", password="testpassword")
         FriendShip.objects.create(following=self.user, followed=other_user)
         FriendShip.objects.create(following=other_user, followed=self.user)

@@ -1,18 +1,26 @@
 # from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Exists, OuterRef
+from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.views.generic import DeleteView, DetailView, ListView
+from django.views.generic import DeleteView, DetailView, ListView, View
 from django.views.generic.edit import CreateView
 
-from tweets.models import Tweet
+from tweets.models import Like, Tweet
 
 
 class HomeView(LoginRequiredMixin, ListView):
     model = Tweet
     context_object_name = "tweets"
     template_name = "tweets/home.html"
-    queryset = Tweet.objects.select_related("user")
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=user)
+        queryset = queryset.annotate(liked_by_user=Exists(liked_subquery))
+        return queryset
 
 
 class TweetCreateView(CreateView):
@@ -39,3 +47,25 @@ class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         tweet = self.get_object()
         return tweet.user == self.request.user
+
+
+class LikeView(LoginRequiredMixin, View):
+    model = Like
+
+    def post(self, request, *args, **kwargs):
+        target_tweet_id = self.kwargs.get("pk")
+        target_tweet = Tweet.objects.get(pk=target_tweet_id)
+        liked_by = request.user
+        Like.objects.get_or_create(tweet=target_tweet, user=liked_by)
+        context = {"likes_count": target_tweet.likes.count()}
+        return JsonResponse(context)
+
+
+class UnlikeView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        target_tweet_id = self.kwargs.get("pk")
+        target_tweet = Tweet.objects.get(pk=target_tweet_id)
+        liked_by = request.user
+        Like.objects.filter(tweet=target_tweet, user=liked_by).delete()
+        context = {"likes_count": target_tweet.likes.count()}
+        return JsonResponse(context)

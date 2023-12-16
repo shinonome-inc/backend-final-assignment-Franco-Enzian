@@ -38,6 +38,13 @@ class TweetDetailView(DetailView):
     model = Tweet
     template_name = "tweets/detail.html"
 
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=user)
+        queryset = queryset.annotate(liked_by_user=Exists(liked_subquery))
+        return queryset
+
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Tweet

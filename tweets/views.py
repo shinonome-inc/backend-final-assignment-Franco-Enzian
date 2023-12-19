@@ -1,7 +1,6 @@
 # from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Exists, OuterRef
 from django.http import Http404, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, View
@@ -14,13 +13,7 @@ class HomeView(LoginRequiredMixin, ListView):
     model = Tweet
     context_object_name = "tweets"
     template_name = "tweets/home.html"
-
-    def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=user)
-        queryset = queryset.annotate(liked_by_user=Exists(liked_subquery))
-        return queryset
+    queryset = Tweet.objects.select_related("user").prefetch_related("likes").all().order_by("-created_at")
 
 
 class TweetCreateView(CreateView):
@@ -37,13 +30,6 @@ class TweetCreateView(CreateView):
 class TweetDetailView(DetailView):
     model = Tweet
     template_name = "tweets/detail.html"
-
-    def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=user)
-        queryset = queryset.annotate(liked_by_user=Exists(liked_subquery))
-        return queryset
 
 
 class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

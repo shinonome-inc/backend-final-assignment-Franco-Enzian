@@ -2,14 +2,13 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Exists, OuterRef
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, TemplateView, View
 
 from accounts.models import FriendShip, User
-from tweets.models import Like, Tweet
+from tweets.models import Tweet
 
 from .forms import SignupForm
 
@@ -36,10 +35,12 @@ class UserProfileView(TemplateView):
         context = super().get_context_data(**kwargs)
         username = self.kwargs["username"]
         profile_user = get_object_or_404(User, username=username)
-        tweets = Tweet.objects.filter(user=profile_user).order_by("-created_at")
-
-        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=self.request.user)
-        tweets = tweets.annotate(liked_by_user=Exists(liked_subquery))
+        tweets = (
+            Tweet.objects.select_related("user")
+            .prefetch_related("likes")
+            .filter(user=profile_user)
+            .order_by("-created_at")
+        )
 
         followers_count = FriendShip.objects.filter(followed=profile_user).count()
         following_count = FriendShip.objects.filter(following=profile_user).count()
@@ -48,13 +49,6 @@ class UserProfileView(TemplateView):
         context["followers_count"] = followers_count
         context["following_count"] = following_count
         return context
-
-    def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-        liked_subquery = Like.objects.filter(tweet=OuterRef("pk"), user=user)
-        queryset = queryset.annotate(liked_by_user=Exists(liked_subquery))
-        return queryset
 
 
 class FollowView(LoginRequiredMixin, View):

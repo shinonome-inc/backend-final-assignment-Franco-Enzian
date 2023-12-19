@@ -21,7 +21,7 @@ class TestHomeView(TestCase):
     def test_success_get(self):
         response = self.client.get(self.url)
         context_tweets = response.context["tweets"]
-        db_tweets = Tweet.objects.all().order_by("id")
+        db_tweets = Tweet.objects.all().order_by("-created_at")
         self.assertEqual(list(context_tweets), list(db_tweets))
 
 

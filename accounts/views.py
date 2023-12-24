@@ -2,13 +2,14 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, TemplateView, View
 
 from accounts.models import FriendShip, User
-from tweets.models import Tweet
+from tweets.models import Like, Tweet
 
 from .forms import SignupForm
 
@@ -37,11 +38,12 @@ class UserProfileView(TemplateView):
         profile_user = get_object_or_404(User, username=username)
         tweets = (
             Tweet.objects.select_related("user")
-            .prefetch_related("likes")
+            .prefetch_related(
+                Prefetch("likes", queryset=Like.objects.filter(user=self.request.user), to_attr="liked_by_user")
+            )
             .filter(user=profile_user)
             .order_by("-created_at")
         )
-
         followers_count = FriendShip.objects.filter(followed=profile_user).count()
         following_count = FriendShip.objects.filter(following=profile_user).count()
         context["profile_user"] = profile_user

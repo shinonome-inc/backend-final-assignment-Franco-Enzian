@@ -16,6 +16,7 @@ document.querySelectorAll('.like-button').forEach(button => {
         const tweetId = this.dataset.tweetId;
         const isLiked = this.dataset.liked === 'true';
         const url = isLiked ? `/tweets/${tweetId}/unlike/` : `/tweets/${tweetId}/like/`;
+        console.log(isLiked, url)
 
         fetch(url, {
             method: 'POST',

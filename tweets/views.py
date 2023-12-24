@@ -1,6 +1,7 @@
 # from django.shortcuts import render
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Prefetch
 from django.http import Http404, JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, View
@@ -13,7 +14,13 @@ class HomeView(LoginRequiredMixin, ListView):
     model = Tweet
     context_object_name = "tweets"
     template_name = "tweets/home.html"
-    queryset = Tweet.objects.select_related("user").prefetch_related("likes").all().order_by("-created_at")
+    queryset = Tweet.objects.select_related("user").order_by("-created_at")
+
+    def get_queryset(self):
+        queryset = self.queryset.prefetch_related(
+            Prefetch("likes", queryset=Like.objects.filter(user=self.request.user), to_attr="liked_by_user")
+        )
+        return queryset
 
 
 class TweetCreateView(CreateView):
@@ -43,8 +50,6 @@ class TweetDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 class LikeView(LoginRequiredMixin, View):
-    model = Like
-
     def post(self, request, *args, **kwargs):
         target_tweet_id = self.kwargs.get("pk")
 
@@ -53,8 +58,8 @@ class LikeView(LoginRequiredMixin, View):
         except Tweet.DoesNotExist:
             raise Http404("Tweet not found")
 
-        liked_by = request.user
-        Like.objects.get_or_create(tweet=target_tweet, user=liked_by)
+        liked_by_user = request.user
+        Like.objects.get_or_create(tweet=target_tweet, user=liked_by_user)
         context = {"likes_count": target_tweet.likes.count()}
         return JsonResponse(context)
 
@@ -68,7 +73,7 @@ class UnlikeView(LoginRequiredMixin, View):
         except Tweet.DoesNotExist:
             raise Http404("Tweet not found")
 
-        liked_by = request.user
-        Like.objects.filter(tweet=target_tweet, user=liked_by).delete()
+        liked_by_user = request.user
+        Like.objects.filter(tweet=target_tweet, user=liked_by_user).delete()
         context = {"likes_count": target_tweet.likes.count()}
         return JsonResponse(context)

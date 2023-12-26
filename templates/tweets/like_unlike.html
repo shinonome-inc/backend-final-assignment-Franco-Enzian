@@ -1,0 +1,47 @@
+<script>
+const getCookie = (name) => {
+  if (document.cookie && document.cookie !== '') {
+    for (const cookie of document.cookie.split(';')) {
+      const [key, value] = cookie.trim().split('=')
+      if (key === name) {
+        return decodeURIComponent(value)
+      }
+    }
+  }
+}
+const csrftoken = getCookie('csrftoken')
+
+document.querySelectorAll('.like-button').forEach(button => {
+    button.addEventListener('click', function () {
+        const tweetId = this.dataset.tweetId;
+        const isLiked = this.dataset.liked === 'true';
+        const url = isLiked ? `/tweets/${tweetId}/unlike/` : `/tweets/${tweetId}/like/`;
+        console.log(isLiked, url)
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // ここでいいね数の表示とボタンの状態を更新
+        const likesCountElement = document.getElementById(`likes-count-${tweetId}`);
+        if (likesCountElement) {
+            likesCountElement.textContent = `${data.likes_count}いいね`;
+        }
+            if (isLiked) {
+                this.dataset.liked = 'false';
+                this.textContent = 'いいね';
+            } else {
+                this.dataset.liked = 'true';
+                this.textContent = 'いいね解除';
+            }
+            console.log(data)
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+    </script>

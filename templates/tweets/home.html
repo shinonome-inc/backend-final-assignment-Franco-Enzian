@@ -11,14 +11,19 @@
 <a href="{% url 'tweets:create' %}">ツイート作成</a>
 
 {% for tweet in tweets %}
-
 <h2><a href="{% url 'accounts:user_profile' tweet.user.username %}">{{ tweet.user }}</a></h2>
 <p>{{ tweet.content|truncatechars:30 }}</p>
+{% if tweet.liked_by_user %}
+        <button class="like-button" data-tweet-id="{{ tweet.pk }}" data-liked="true">いいね解除</button>
+    {% else %}
+        <button class="like-button" data-tweet-id="{{ tweet.pk }}" data-liked="false">いいね</button>
+    {% endif %}
+<p id="likes-count-{{ tweet.pk }}">{{ tweet.likes.count }}いいね</p>
 <p>公開日：{{ tweet.created_at }}</p>
 <a href="{% url 'tweets:detail' tweet.pk %}">詳細</a>
 {% if tweet.user == request.user %}
 <a href="{% url 'tweets:delete' tweet.pk %}">削除</a>
 {% endif %}
 {% endfor %}
-
+{% include 'tweets/like_unlike.html' %}
 {% endblock %}
